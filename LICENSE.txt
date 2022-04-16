@@ -1,0 +1,31 @@
+Authors and Contributors:
+    Misha Klopukh
+    William Edward Hahn
+
+Permission to use, copy, modify, and/or distribute these materials for any
+purpose with or without fee and without restriction is hereby granted.
+Attribution is appreciated, but is not necessary.
+
+To the best of the authors' knowledge, the materials provided here are
+functional, free of malware, and do not infringe on any rights of any persons,
+legal or otherwise. However, the authors do not warrant or guarantee against
+any damages to any persons or property caused by or in relation to these
+materials.
+
+Disclaimer:
+
+All materials, including but not limited to any software, source code, and
+instructions, in this tutorial are provided "AS IS", without warranty of any
+kind, express or implied, including but not limited to the warranties of
+merchantability, fitness for a particular purpose, and noninfringement. In no
+event shall the authors or contributors be held liable for any claim, damages,
+or other liability, whether in action of contract, tort, or otherwise, arising
+from, out of, or in connection with these materials or the use of or other
+dealings in these materials.
+
+-----------------------------------------------------------
+
+For those of you who do not speak legalese:
+  1)  Do whatever you want with this.
+  2)  We don't think you'll have any problems.
+  3)  If you do, though, it's not our fault.
