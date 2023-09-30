@@ -1,64 +1,61 @@
-#!/usr/bin/env python3
 import torch
 import numpy as np
-import cv2
+import picamera
+import picamera.array
 import RPi.GPIO as GPIO
+import time
+
+# Initialize GPIO
+GPIO.setmode(GPIO.BCM)
+GPIO.setwarnings(False)
+LED_PIN_1 = 23
+LED_PIN_2 = 24
+GPIO.setup(LED_PIN_1, GPIO.OUT)
+GPIO.setup(LED_PIN_2, GPIO.OUT)
+
+# Turn off LEDs initially
+GPIO.output(LED_PIN_1, GPIO.LOW)
+GPIO.output(LED_PIN_2, GPIO.LOW)
+
+# Load model
+torch.backends.quantized.engine = 'qnnpack'
+model = torch.jit.load('sfdc_tutorial_classifier.pth')
+torch.no_grad()
+
+def picamera_image_to_tensor(img):
+    # Convert RGB to a batched tensor
+    img = np.expand_dims(img, axis=0)
+    # Move the color channel to dim 1
+    img = img.transpose(0, 3, 1, 2)
+    # Convert to torch tensor and set the data type
+    return torch.tensor(img, dtype=torch.float32)
 
 try:
-    # Initialize GPIO for LEDs
-    LED_PIN1 = 23
-    LED_PIN2 = 24
-    GPIO.setmode(GPIO.BCM)
-    GPIO.setup([LED_PIN1, LED_PIN2], GPIO.OUT)
+    with picamera.PiCamera() as camera:
+        camera.resolution = (224, 224)
+        with picamera.array.PiRGBArray(camera) as stream:
+            while True:
+                camera.capture(stream, 'rgb')
+                image = stream.array
 
-    # Turn off LEDs initially
-    GPIO.output(LED_PIN1, GPIO.LOW)
-    GPIO.output(LED_PIN2, GPIO.LOW)
+                # Process the image through the model
+                inputs = picamera_image_to_tensor(image)
+                outputs = model(inputs)
+                prediction = outputs[0].max(1)[1].item()
 
-    # Initialize camera
-    camera = cv2.VideoCapture(0)
-    if not camera.isOpened():
-        raise Exception("Could not open video device")
-    
-    camera.set(cv2.CAP_PROP_FRAME_WIDTH, 224)
-    camera.set(cv2.CAP_PROP_FRAME_HEIGHT, 224)
+                # Change LEDs based on our prediction
+                if prediction == 0:
+                    GPIO.output(LED_PIN_1, GPIO.HIGH)
+                    GPIO.output(LED_PIN_2, GPIO.LOW)
+                elif prediction == 1:
+                    GPIO.output(LED_PIN_1, GPIO.LOW)
+                    GPIO.output(LED_PIN_2, GPIO.HIGH)
 
-    # Load PyTorch model
-    torch.backends.quantized.engine = 'qnnpack'
-    model = torch.jit.load('sfdc_tutorial_classifier.pth')
-    if model is None:
-        raise Exception("Could not load the model")
-    
-    torch.no_grad()
+                # Clear the stream for the next capture
+                stream.truncate(0)
 
-    def opencv_image_to_tensor(img):
-        img = cv2.cvtColor(img, cv2.COLOR_BGR2RGB)
-        img = np.expand_dims(img, axis=0)
-        img = np.transpose(img, (0, 3, 1, 2))
-        return torch.from_numpy(img).float()
-
-    while True:
-        ret, image = camera.read()
-        if not ret:
-            raise Exception("Could not read frame")
-
-        inputs = opencv_image_to_tensor(image)
-        outputs = model(inputs)
-        prediction = outputs[0].max()[1].item()
-
-        # Update LEDs based on prediction
-        if prediction == 0:
-            GPIO.output(LED_PIN1, GPIO.HIGH)
-            GPIO.output(LED_PIN2, GPIO.LOW)
-        elif prediction == 1:
-            GPIO.output(LED_PIN1, GPIO.LOW)
-            GPIO.output(LED_PIN2, GPIO.HIGH)
-
-except Exception as e:
-    print(f"An error occurred: {e}")
-
+except KeyboardInterrupt:
+    print("Interrupted, cleaning up...")
 finally:
-    # Cleanup GPIO and camera
-    if 'camera' in locals():
-        camera.release()
+    # Release resources
     GPIO.cleanup()
