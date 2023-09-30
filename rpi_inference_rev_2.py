@@ -1,6 +1,5 @@
 #!/usr/bin/env python3
 import torch
-import numpy as np
 import cv2
 from gpiozero import LED
 from picamera2 import Picamera2
@@ -37,11 +36,10 @@ def opencv_image_to_tensor(img):
     img = img.transpose(0, 3, 1, 2)
     return torch.tensor(img)
 
-# Main loop for capturing and displaying frames
+# Main loop for capturing, processing, and displaying frames
 try:
     while True:
         frame = piCam.capture_array()
-        cv2.imshow("piCam", frame)
 
         # Process the image through the model
         inputs = opencv_image_to_tensor(frame)
@@ -55,6 +53,9 @@ try:
         elif prediction == 1:
             led1.off()
             led2.on()
+
+        # Display the processed frame
+        cv2.imshow("piCam", frame)
 
         if cv2.waitKey(1) == ord('q'):
             break
