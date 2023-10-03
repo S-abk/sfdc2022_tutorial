@@ -21,28 +21,21 @@ piCam.configure("preview")
 piCam.start()
 
 # Load the PyTorch model
+torch.backends.quantized.engine = 'qnnpack'
 model = torch.jit.load('sfdc_tutorial_classifier.pth')
 torch.no_grad()
 
-# Function to convert OpenCV image to PyTorch tensor
-def opencv_image_to_tensor(img):
-    img = cv2.cvtColor(img, cv2.COLOR_BGR2RGB)
-    img = img.astype(np.float32) / 255.0
+# Function to convert image to PyTorch tensor
+def image_to_tensor(img):
     img = torch.tensor(img).permute(2, 0, 1)
     img = img.unsqueeze(0)
-    
-    # Quantize the tensor to match the model (Assuming qint8 quantization)
-    scale = 0.1
-    zero_point = 128
-    img = torch.quantize_per_tensor(img, scale=scale, zero_point=zero_point, dtype=torch.qint8)
-
     return img
 
 # Main Loop
 while True:
     frame = piCam.capture_array()
 
-    tensor_input = opencv_image_to_tensor(frame)
+    tensor_input = image_to_tensor(frame)
     
     try:
         output = model(tensor_input)
