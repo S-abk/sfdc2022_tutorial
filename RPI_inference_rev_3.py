@@ -1,7 +1,7 @@
 import cv2
 import torch
 from gpiozero import LED
-from picamera2 import PiCamera2
+from picamera2 import Picamera2
 from picamera2 import ControlId
 
 # Setup
@@ -13,7 +13,7 @@ led2 = LED(24)
 led1.off()
 led2.off()
 
-piCam = PiCamera2()
+piCam = Picamera2()
 piCam.preview_configuration.main.size = (224, 224)
 piCam.preview_configuration.main.format = "RGB888"
 piCam.preview_configuration.align()
