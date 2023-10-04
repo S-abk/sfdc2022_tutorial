@@ -2,7 +2,7 @@ import cv2
 import torch
 from gpiozero import LED
 from picamera2 import Picamera2
-from picamera2 import ControlId
+#from picamera2 import ControlId
 
 # Setup
 torch.backends.quantized.engine = 'qnnpack'
