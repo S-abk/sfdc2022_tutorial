@@ -22,11 +22,18 @@ piCam.start()
 model = torch.jit.load('sfdc_tutorial_classifier.pth')
 torch.no_grad()
 
+#def image_to_tensor(img):
+#    """Convert the captured frame to a tensor."""
+#    img = torch.tensor(img).permute(2, 0, 1)
+#    img = img.unsqueeze(0)
+#    return img
+
 def image_to_tensor(img):
     """Convert the captured frame to a tensor."""
-    img = torch.tensor(img).permute(2, 0, 1)
+    img = torch.tensor(img, dtype=torch.float32).permute(2, 0, 1)  # Specify dtype as float32
     img = img.unsqueeze(0)
     return img
+
 
 # Main inference loop
 try:
