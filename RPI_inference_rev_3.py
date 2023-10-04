@@ -28,10 +28,18 @@ torch.no_grad()
 #    img = img.unsqueeze(0)
 #    return img
 
+#def image_to_tensor(img):
+#    """Convert the captured frame to a tensor."""
+#    img = torch.tensor(img, dtype=torch.float32).permute(2, 0, 1)  # Specify dtype as float32
+#    img = img.unsqueeze(0)
+#    return img
+
+
 def image_to_tensor(img):
     """Convert the captured frame to a tensor."""
-    img = torch.tensor(img, dtype=torch.float32).permute(2, 0, 1)  # Specify dtype as float32
-    img = img.unsqueeze(0)
+    img = img[None, :, :, [2, 1, 0]]  # Add a batch channel and convert BGR to RGB
+    img = img.transpose(0, 3, 1, 2)  # Move the color channel to dim 1
+    img = torch.tensor(img, dtype=torch.float32)  # Convert to a torch tensor with float32 type
     return img
 
 
