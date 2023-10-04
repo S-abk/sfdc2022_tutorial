@@ -23,12 +23,21 @@ piCam.start()
 model = torch.jit.load('sfdc_tutorial_classifier.pth')
 torch.no_grad()
 
+# def image_to_tensor(img):
+#     """Convert the captured frame to a tensor."""
+#     img = img[None, :, :, [2, 1, 0]]  # Add a batch channel and convert BGR to RGB
+#     img = img.transpose(0, 3, 1, 2)  # Move the color channel to dim 1
+#     img = torch.tensor(img, dtype=torch.float32)  # Convert to a torch tensor with float32 type
+#     return img
+
 def image_to_tensor(img):
     """Convert the captured frame to a tensor."""
-    img = img[None, :, :, [2, 1, 0]]  # Add a batch channel and convert BGR to RGB
-    img = img.transpose(0, 3, 1, 2)  # Move the color channel to dim 1
-    img = torch.tensor(img, dtype=torch.float32)  # Convert to a torch tensor with float32 type
+    img = cv2.cvtColor(img, cv2.COLOR_BGR2RGB)  # Convert BGR to RGB
+    img = cv2.resize(img, (224, 224))  # Resize the image to 224x224
+    img = torch.tensor(img, dtype=torch.float32).permute(2, 0, 1)  # Convert to tensor and rearrange dimensions
+    img = img.unsqueeze(0)  # Add a batch dimension
     return img
+
 
 # Main inference loop
 try:
